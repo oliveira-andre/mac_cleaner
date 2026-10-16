@@ -1,0 +1,10 @@
+Target dependency graph (4 targets)
+Target 'MacCleanerUninstall-product' in project 'MacCleaner'
+➜ Explicit dependency on target 'CSensors' in project 'MacCleaner'
+➜ Explicit dependency on target 'IPCProtocol' in project 'MacCleaner'
+➜ Explicit dependency on target 'MacCleanerCore' in project 'MacCleaner'
+Target 'MacCleanerCore' in project 'MacCleaner'
+➜ Explicit dependency on target 'CSensors' in project 'MacCleaner'
+➜ Explicit dependency on target 'IPCProtocol' in project 'MacCleaner'
+Target 'IPCProtocol' in project 'MacCleaner' (no dependencies)
+Target 'CSensors' in project 'MacCleaner' (no dependencies)

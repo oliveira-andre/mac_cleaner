@@ -1,0 +1,4 @@
+module CSensors {
+umbrella header "/Users/b1gb0ss/reverse_engineering/mac_cleaner/Sources/CSensors/include/CSensors.h"
+export *
+}

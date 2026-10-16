@@ -1,0 +1,4 @@
+module MacCleanerCore {
+header "MacCleanerCore-Swift.h"
+export *
+}

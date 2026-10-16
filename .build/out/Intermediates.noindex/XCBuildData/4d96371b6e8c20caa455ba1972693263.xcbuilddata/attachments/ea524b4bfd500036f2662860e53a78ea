@@ -1,0 +1,39 @@
+{
+  "" : {
+    "diagnostics" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/MacCleanerHelper-primary.dia",
+    "emit-module-dependencies" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/MacCleanerHelper-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/MacCleanerHelper-primary-emit-module.dia",
+    "pch" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/MacCleanerHelper-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/MacCleanerHelper-primary.swiftdeps"
+  },
+  "/Users/b1gb0ss/reverse_engineering/mac_cleaner/Sources/MacCleanerHelper/HelperService.swift" : {
+    "const-values" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/HelperService.swiftconstvalues",
+    "dependencies" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/HelperService.d",
+    "diagnostics" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/HelperService.dia",
+    "index-unit-output-path" : "/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/HelperService.o",
+    "llvm-bc" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/HelperService.bc",
+    "object" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/HelperService.o",
+    "swift-dependencies" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/HelperService.swiftdeps",
+    "swiftmodule" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/HelperService~partial.swiftmodule"
+  },
+  "/Users/b1gb0ss/reverse_engineering/mac_cleaner/Sources/MacCleanerHelper/SelfTest.swift" : {
+    "const-values" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/SelfTest.swiftconstvalues",
+    "dependencies" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/SelfTest.d",
+    "diagnostics" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/SelfTest.dia",
+    "index-unit-output-path" : "/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/SelfTest.o",
+    "llvm-bc" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/SelfTest.bc",
+    "object" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/SelfTest.o",
+    "swift-dependencies" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/SelfTest.swiftdeps",
+    "swiftmodule" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/SelfTest~partial.swiftmodule"
+  },
+  "/Users/b1gb0ss/reverse_engineering/mac_cleaner/Sources/MacCleanerHelper/main.swift" : {
+    "const-values" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/main.swiftconstvalues",
+    "dependencies" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/main.d",
+    "diagnostics" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/main.dia",
+    "index-unit-output-path" : "/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/main.o",
+    "llvm-bc" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/main.bc",
+    "object" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/main.o",
+    "swift-dependencies" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/main.swiftdeps",
+    "swiftmodule" : "/Users/b1gb0ss/reverse_engineering/mac_cleaner/.build/out/Intermediates.noindex/MacCleaner.build/Debug/MacCleanerHelper-p.build/Objects-normal/arm64/main~partial.swiftmodule"
+  }
+}

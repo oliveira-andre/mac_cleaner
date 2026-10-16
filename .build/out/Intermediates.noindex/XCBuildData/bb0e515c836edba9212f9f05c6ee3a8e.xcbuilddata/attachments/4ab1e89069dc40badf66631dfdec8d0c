@@ -1,0 +1,4 @@
+module IPCProtocol {
+header "IPCProtocol-Swift.h"
+export *
+}
