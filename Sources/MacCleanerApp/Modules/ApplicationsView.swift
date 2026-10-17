@@ -1,5 +1,6 @@
 import SwiftUI
 import MacCleanerCore
+import MacCleanerUI
 
 @MainActor
 final class ApplicationsViewModel: ObservableObject {
@@ -51,59 +52,91 @@ struct ApplicationsView: View {
     }()
 
     var body: some View {
-        HSplitView {
-            List(vm.apps, selection: Binding(
-                get: { vm.selected?.id },
-                set: { id in if let app = vm.apps.first(where: { $0.id == id }) { vm.scanLeftovers(for: app) } }
-            )) { app in
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(app.name)
-                    Text(app.bundleID).font(.caption2).foregroundStyle(.secondary)
-                }.tag(app.id)
+        VStack(alignment: .leading, spacing: Spacing.xl) {
+            PageHeader(Module.applications)
+            HStack(alignment: .top, spacing: Spacing.lg) {
+                appList.frame(width: 260)
+                detail.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-            .frame(minWidth: 240)
-
-            detail.frame(minWidth: 420)
         }
-        .navigationTitle("Applications — Uninstaller")
+        .padding(Spacing.xxl)
         .onAppear { vm.loadApps() }
     }
 
-    @ViewBuilder private var detail: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            if let app = vm.selected {
-                Text(app.name).font(.title2.weight(.semibold))
-                Text(app.bundleID).font(.callout).foregroundStyle(.secondary)
-
-                if vm.scanning {
-                    ProgressView("Scanning leftovers…")
-                } else if let plan = vm.plan {
-                    Text("Deep clean: \(plan.items.count) items · \(byteFormatter.string(fromByteCount: Int64(plan.totalBytes)))")
-                        .font(.headline)
-                    List(plan.items) { item in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(item.category.rawValue).font(.caption.weight(.medium))
-                                Text(item.url.path).font(.caption2).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+    private var appList: some View {
+        DataTable {
+            DataTableHeader("Installed") {
+                Text("\(vm.apps.count)").textStyle(.microCap).foregroundStyle(Palette.onDarkMuted)
+            }
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(vm.apps) { app in
+                        Button { vm.scanLeftovers(for: app) } label: {
+                            VStack(alignment: .leading, spacing: Spacing.xxs) {
+                                Text(app.name).lineLimit(1)
+                                Text(app.bundleID).textStyle(.codeSm).foregroundStyle(Palette.onDarkMuted)
+                                    .lineLimit(1).truncationMode(.middle)
                             }
-                            Spacer()
-                            Text(byteFormatter.string(fromByteCount: Int64(item.sizeBytes)))
-                                .font(.caption).monospacedDigit().foregroundStyle(.secondary)
+                            .dataTableRow(selected: vm.selected?.id == app.id)
+                            .contentShape(Rectangle())
                         }
-                    }
-                    Button(role: .destructive) { vm.trashSelected() } label: {
-                        Label("Move all to Trash", systemImage: "trash")
-                    }
-                    if let msg = vm.statusMessage {
-                        Text(msg).font(.callout).foregroundStyle(.green)
+                        .buttonStyle(.plain)
                     }
                 }
-            } else {
-                Text("Select an app to deep-clean.").foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    @ViewBuilder private var detail: some View {
+        if let app = vm.selected {
+            VStack(alignment: .leading, spacing: Spacing.lg) {
+                HStack(alignment: .bottom, spacing: Spacing.md) {
+                    VStack(alignment: .leading, spacing: Spacing.xxs) {
+                        Text(app.name).textStyle(.headingSm).foregroundStyle(Palette.onPrimary).lineLimit(1)
+                        Text(app.bundleID).textStyle(.codeSm).foregroundStyle(Palette.onDarkMuted).lineLimit(1)
+                    }
+                    Spacer(minLength: 0)
+                    if let plan = vm.plan, !vm.scanning {
+                        HeaderStat(byteFormatter.string(fromByteCount: Int64(plan.totalBytes)),
+                                   caption: "\(plan.items.count) items to deep clean")
+                    }
+                }
+
+                if vm.scanning {
+                    LoadingState("Scanning leftovers…")
+                } else if let plan = vm.plan {
+                    DataTable {
+                        DataTableHeader("Deep clean")
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                ForEach(plan.items) { item in
+                                    HStack(spacing: Spacing.md) {
+                                        VStack(alignment: .leading, spacing: Spacing.xxs) {
+                                            Text(item.category.rawValue)
+                                            Text(item.url.path).textStyle(.codeSm).foregroundStyle(Palette.onDarkMuted)
+                                                .lineLimit(1).truncationMode(.middle)
+                                        }
+                                        Spacer(minLength: Spacing.md)
+                                        Text(byteFormatter.string(fromByteCount: Int64(item.sizeBytes)))
+                                            .textStyle(.caption).monospacedDigit().foregroundStyle(Palette.onDarkMuted)
+                                    }
+                                    .dataTableRow()
+                                }
+                            }
+                        }
+                    }
+                    HStack(spacing: Spacing.md) {
+                        if let msg = vm.statusMessage { StatusLine(msg, kind: .success) }
+                        Spacer()
+                        Button { vm.trashSelected() } label: {
+                            Label("Move all to Trash", systemImage: "trash")
+                        }
+                        .buttonStyle(.action(.primary))
+                    }
+                }
+            }
+        } else {
+            EmptyState("Pick an app", message: "Select an app to find everything it left behind.")
+        }
     }
 }

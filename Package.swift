@@ -27,6 +27,11 @@ let package = Package(
                 .linkedFramework("IOBluetooth"),
             ]
         ),
+        // Shared design system (DESIGN.md tokens + components) for both UIs.
+        // Rubik ships from Resources/Fonts; see Sources/MacCleanerUI/Rubik.swift.
+        .target(
+            name: "MacCleanerUI"
+        ),
         // Root privileged helper daemon (installed via SMAppService).
         .executableTarget(
             name: "MacCleanerHelper",
@@ -35,7 +40,7 @@ let package = Package(
         // The menu-bar ("top right") health addon.
         .executableTarget(
             name: "MacCleanerMenu",
-            dependencies: ["MacCleanerCore"]
+            dependencies: ["MacCleanerCore", "MacCleanerUI"]
         ),
         // CLI for the Uninstaller deep-clean (dry-run by default).
         .executableTarget(
@@ -45,7 +50,7 @@ let package = Package(
         // The main app window (6-module sidebar).
         .executableTarget(
             name: "MacCleanerApp",
-            dependencies: ["MacCleanerCore"]
+            dependencies: ["MacCleanerCore", "MacCleanerUI"]
         ),
     ]
 )

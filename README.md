@@ -1,7 +1,7 @@
 # mac_cleaner
 
 <p align="center">
-  <img src="icon.png" width="140" alt="MacCleaner app icon — a white display with a pink broom on a purple background">
+  <img src="icon.png" width="140" alt="MacCleaner app icon — a white display with a pink-and-lime broom on a midnight-violet background">
 </p>
 
 A from-scratch, all-Swift re-implementation of a CleanMyMac-style macOS utility,
@@ -25,9 +25,10 @@ after a change to rebuild and relaunch.
 
 ## App icon
 
-The icon is drawn entirely in code by `Scripts/make-icon.swift` — a purple
-gradient background, a centered white monitor, and a pink broom across the screen
-(all `NSBezierPath`; there's no broom in SF Symbols). It renders every size into
+The icon is drawn entirely in code by `Scripts/make-icon.swift` — a deep-violet
+→ night gradient background, a centered white monitor with a dark screen, and a
+pink-handled, lime-bristled broom across it, all in `DESIGN.md` colors (all
+`NSBezierPath`; there's no broom in SF Symbols). It renders every size into
 an `.iconset` and runs `iconutil` to produce a multi-resolution `.icns`, plus a
 `…preview.png` so you can eyeball the result.
 
@@ -42,6 +43,17 @@ cp build/AppIcon.preview.png icon.png
 `make-app.sh` calls this automatically when `build/AppIcon.icns` is missing, so
 deleting that file regenerates the icon on the next build. To restyle, edit the
 colors/shapes at the top of `drawIcon` / `drawBroom` in the script.
+
+## Design
+
+The UI follows [`DESIGN.md`](DESIGN.md) (a Sentry-inspired system): everything
+sits on the dark `#1f1633` canvas, with `#150f23` cards edged in 1px
+`#362d59` hairline violet, Rubik for UI text, Monaco for paths, and one lime
+keyword chip per page title. Tokens and shared components (buttons, cards,
+tables, meters, page headers) live in the `MacCleanerUI` target, used by both
+the main app and the menu-bar addon. Rubik ships in `Resources/Fonts` (SIL OFL);
+the `make-*.sh` scripts copy it into each `.app`, and `swift run` loads it
+straight from the checkout.
 
 ## Running locally without the Apple Developer Program ($99/yr) — yes
 

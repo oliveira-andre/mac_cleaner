@@ -1,5 +1,6 @@
 import SwiftUI
 import MacCleanerCore
+import MacCleanerUI
 
 @MainActor
 final class ClutterViewModel: ObservableObject {
@@ -52,79 +53,100 @@ struct ClutterView: View {
     }()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("My Clutter").font(.largeTitle.weight(.bold))
-            Text("Large & old files and duplicates — OrganizeModule")
-                .font(.callout).foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: Spacing.xl) {
+            PageHeader(Module.clutter)
 
             if vm.scanning {
-                Spacer(); ProgressView("Scanning Downloads, Documents, Desktop, Movies…")
-                    .frame(maxWidth: .infinity); Spacer()
+                LoadingState("Scanning Downloads, Documents, Desktop, Movies…")
             } else if let report = vm.report {
-                Picker("", selection: $tab) {
-                    Text("Large & Old (\(bf.string(fromByteCount: Int64(report.largeOldBytes))))").tag(0)
-                    Text("Duplicates (\(bf.string(fromByteCount: Int64(report.duplicateReclaimableBytes))))").tag(1)
+                TokenTabs(selection: $tab, tabs: [
+                    (0, "Large & Old · \(bf.string(fromByteCount: Int64(report.largeOldBytes)))"),
+                    (1, "Duplicates · \(bf.string(fromByteCount: Int64(report.duplicateReclaimableBytes)))"),
+                ])
+
+                DataTable {
+                    if tab == 0 { largeOldList(report) } else { duplicatesList(report) }
                 }
-                .pickerStyle(.segmented).labelsHidden()
 
-                if tab == 0 { largeOldList(report) } else { duplicatesList(report) }
-
-                HStack {
-                    if let msg = vm.statusMessage {
-                        Text(msg).font(.callout).foregroundStyle(.green)
-                    }
+                HStack(spacing: Spacing.md) {
+                    if let msg = vm.statusMessage { StatusLine(msg, kind: .success) }
                     Spacer()
-                    Button("Rescan") { vm.scan() }
-                    Button(role: .destructive) { vm.clean() } label: {
+                    Button("Rescan") { vm.scan() }.buttonStyle(.action(.ghost))
+                    Button { vm.clean() } label: {
                         Label("Move \(bf.string(fromByteCount: Int64(vm.selectedBytes(in: report)))) to Trash",
                               systemImage: "trash")
-                    }.disabled(vm.selected.isEmpty)
+                    }
+                    .buttonStyle(.action(.primary))
+                    .disabled(vm.selected.isEmpty)
                 }
             } else {
-                Spacer(); Button("Scan") { vm.scan() }.controlSize(.large).frame(maxWidth: .infinity); Spacer()
+                EmptyState("My Clutter", message: "Find large, old and duplicate files in your home folders.") {
+                    Button("Scan") { vm.scan() }.buttonStyle(.action(.primary))
+                }
             }
         }
-        .padding(24)
+        .padding(Spacing.xxl)
         .onAppear { if vm.report == nil && !vm.scanning { vm.scan() } }
     }
 
     private func largeOldList(_ report: ClutterReport) -> some View {
-        List(report.largeOldFiles) { f in
-            Toggle(isOn: Binding(get: { vm.selected.contains(f.url.path) },
-                                 set: { _ in vm.toggle(f.url.path) })) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(f.url.lastPathComponent).lineLimit(1).truncationMode(.middle)
-                        Text("\(f.ageDays) days since last use").font(.caption2).foregroundStyle(.secondary)
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                if report.largeOldFiles.isEmpty { emptyRow("No large or old files found.") }
+                ForEach(report.largeOldFiles) { f in
+                    Toggle(isOn: Binding(get: { vm.selected.contains(f.url.path) },
+                                         set: { _ in vm.toggle(f.url.path) })) {
+                        HStack(spacing: Spacing.md) {
+                            VStack(alignment: .leading, spacing: Spacing.xxs) {
+                                Text(f.url.lastPathComponent).lineLimit(1).truncationMode(.middle)
+                                Text("\(f.ageDays) days since last use")
+                                    .textStyle(.caption).foregroundStyle(Palette.onDarkMuted)
+                            }
+                            Spacer(minLength: Spacing.md)
+                            Text(bf.string(fromByteCount: Int64(f.sizeBytes)))
+                                .textStyle(.caption).monospacedDigit().foregroundStyle(Palette.onDarkMuted)
+                        }
                     }
-                    Spacer()
-                    Text(bf.string(fromByteCount: Int64(f.sizeBytes))).font(.caption).monospacedDigit()
+                    .toggleStyle(.violetCheckbox)
+                    .dataTableRow()
                 }
             }
         }
     }
 
     private func duplicatesList(_ report: ClutterReport) -> some View {
-        List {
-            ForEach(report.duplicateGroups) { group in
-                Section("\(group.count) copies · \(bf.string(fromByteCount: Int64(group.sizeEach))) each · \(bf.string(fromByteCount: Int64(group.reclaimableBytes))) reclaimable") {
-                    ForEach(group.urls, id: \.path) { url in
-                        Toggle(isOn: Binding(get: { vm.selected.contains(url.path) },
-                                             set: { _ in vm.toggle(url.path) })) {
-                            HStack {
-                                Text(url.lastPathComponent).lineLimit(1).truncationMode(.middle)
-                                if url == group.keeper {
-                                    Text("keep").font(.caption2).foregroundStyle(.blue)
+        ScrollView {
+            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                if report.duplicateGroups.isEmpty { emptyRow("No duplicates found.") }
+                ForEach(report.duplicateGroups) { group in
+                    Section {
+                        ForEach(group.urls, id: \.path) { url in
+                            Toggle(isOn: Binding(get: { vm.selected.contains(url.path) },
+                                                 set: { _ in vm.toggle(url.path) })) {
+                                HStack(spacing: Spacing.sm) {
+                                    Text(url.lastPathComponent).lineLimit(1).truncationMode(.middle)
+                                    if url == group.keeper { Badge("keep", kind: .token) }
+                                    Spacer(minLength: Spacing.md)
+                                    Text(url.deletingLastPathComponent().path)
+                                        .textStyle(.codeSm).foregroundStyle(Palette.onDarkMuted)
+                                        .lineLimit(1).truncationMode(.head)
                                 }
-                                Spacer()
-                                Text(url.deletingLastPathComponent().path)
-                                    .font(.caption2).foregroundStyle(.tertiary)
-                                    .lineLimit(1).truncationMode(.head)
                             }
+                            .toggleStyle(.violetCheckbox)
+                            .dataTableRow()
+                        }
+                    } header: {
+                        DataTableHeader("\(group.count) copies · \(bf.string(fromByteCount: Int64(group.sizeEach))) each") {
+                            Text("\(bf.string(fromByteCount: Int64(group.reclaimableBytes))) reclaimable")
+                                .textStyle(.microCap).foregroundStyle(Palette.onDarkMuted)
                         }
                     }
                 }
             }
         }
+    }
+
+    private func emptyRow(_ message: String) -> some View {
+        Text(message).textStyle(.caption).foregroundStyle(Palette.onDarkMuted).dataTableRow()
     }
 }

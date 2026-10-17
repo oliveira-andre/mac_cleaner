@@ -24,6 +24,9 @@ if [[ ! -f "$HERE/build/AppIcon.icns" ]]; then
 fi
 cp "$HERE/build/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 
+# Rubik (SIL OFL) — registered at launch by Sources/MacCleanerUI/Rubik.swift.
+cp -R "$HERE/Resources/Fonts" "$APP/Contents/Resources/Fonts"
+
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

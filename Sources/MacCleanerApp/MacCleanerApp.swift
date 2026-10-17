@@ -1,5 +1,6 @@
 import SwiftUI
 import MacCleanerCore
+import MacCleanerUI
 
 /// The six top-level modules, mirroring CleanMyMac 5's sidebar.
 enum Module: String, CaseIterable, Identifiable {
@@ -25,29 +26,68 @@ enum Module: String, CaseIterable, Identifiable {
         }
     }
 
-    var tint: Color {
+    // MARK: Page header
+
+    var title: String { self == .overview ? "System Health" : rawValue }
+
+    /// The word wrapped in the lime keyword chip.
+    var highlight: String {
         switch self {
-        case .overview:    return .blue
-        case .smartCare:   return .purple
-        case .cleanup:     return .green
-        case .protection:  return .pink
-        case .performance: return .orange
-        case .applications: return .teal
-        case .clutter:     return .indigo
+        case .overview:  return "Health"
+        case .smartCare: return "Care"
+        case .clutter:   return "Clutter"
+        default:         return rawValue
+        }
+    }
+
+    var eyebrow: String {
+        switch self {
+        case .overview:    return "Live · every 2s"
+        case .smartCare:   return "One-pass scan"
+        case .cleanup:     return "System junk"
+        case .protection:  return "Privacy + malware"
+        case .performance: return "Startup + maintenance"
+        case .applications: return "Uninstaller"
+        case .clutter:     return "Organize"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .overview:    return "RAM, CPU, storage, network, battery, temperature"
+        case .smartCare:   return "Cleanup, Protection, Performance and My Clutter at once"
+        case .cleanup:     return "Caches, logs, saved state, trash, Xcode data"
+        case .protection:  return "Browser privacy data + a starter malware rule set"
+        case .performance: return "Login items, launch agents, maintenance tasks"
+        case .applications: return "Deep-clean an app and its leftovers"
+        case .clutter:     return "Large & old files and exact duplicates"
         }
     }
 
     /// What it maps to in the reverse-engineered design.
-    var reconstructionNote: String {
+    var reconstructs: String {
         switch self {
-        case .overview:    return "Live system health (RAM, CPU, temperature)."
-        case .smartCare:   return "SmartCareModule — orchestrates Cleanup + Protection + Performance."
-        case .cleanup:     return "JunkCleanupModule — system junk, trash, mail caches."
-        case .protection:  return "ProtectionModule — malware (Moonlock) + privacy."
-        case .performance: return "PerformanceModule — login items, launch agents, maintenance, RAM."
-        case .applications: return "ApplicationsModule — deep-clean uninstaller + updater."
-        case .clutter:     return "OrganizeModule — large & old files, duplicates, media junk."
+        case .overview:    return "HealthMonitor"
+        case .smartCare:   return "SmartCareModule"
+        case .cleanup:     return "JunkCleanupModule"
+        case .protection:  return "ProtectionModule"
+        case .performance: return "PerformanceModule"
+        case .applications: return "ApplicationsModule"
+        case .clutter:     return "OrganizeModule"
         }
+    }
+}
+
+extension PageHeader {
+    init(_ module: Module, @ViewBuilder trailing: () -> Trailing) {
+        self.init(module.title, highlight: module.highlight, eyebrow: module.eyebrow,
+                  subtitle: module.subtitle, code: module.reconstructs, trailing: trailing)
+    }
+}
+
+extension PageHeader where Trailing == EmptyView {
+    init(_ module: Module) {
+        self.init(module) { EmptyView() }
     }
 }
 
@@ -64,54 +104,64 @@ struct MacCleanerMainApp: App {
 
     var body: some Scene {
         WindowGroup {
-            NavigationSplitView {
-                List(Module.allCases, selection: $selection) { module in
-                    HStack(spacing: 10) {
-                        Image(systemName: module.systemImage)
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 26, height: 26)
-                            .background(module.tint.gradient, in: RoundedRectangle(cornerRadius: 7))
-                        Text(module.rawValue)
-                            .font(.body.weight(.medium))
-                            .foregroundStyle(.primary)
-                    }
-                    .padding(.vertical, 4)
-                    .tag(module)
-                }
-                .listStyle(.sidebar)
-                .navigationTitle("MacCleaner")
-                .navigationSplitViewColumnWidth(min: 230, ideal: 240)
-            } detail: {
-                switch selection {
-                case .overview:     OverviewView(monitor: model.monitor)
-                case .smartCare:    SmartCareView()
-                case .cleanup:      CleanupView()
-                case .applications: ApplicationsView()
-                case .clutter:      ClutterView()
-                case .performance:  PerformanceView()
-                case .protection:   ProtectionView()
-                default:            PlaceholderView(module: selection)
-                }
+            HStack(spacing: 0) {
+                Sidebar(selection: $selection)
+                Rectangle().fill(Palette.hairlineViolet).frame(width: 1).ignoresSafeArea()
+                detail
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Palette.canvas.ignoresSafeArea())
             }
-            .frame(minWidth: 820, minHeight: 540)
+            .frame(minWidth: 900, minHeight: 600)
+            .preferredColorScheme(.dark)
+            .hidesFocusRing()
         }
-        .windowStyle(.titleBar)
+        .windowStyle(.hiddenTitleBar)
+    }
+
+    @ViewBuilder private var detail: some View {
+        switch selection {
+        case .overview:     OverviewView(monitor: model.monitor)
+        case .smartCare:    SmartCareView()
+        case .cleanup:      CleanupView()
+        case .applications: ApplicationsView()
+        case .clutter:      ClutterView()
+        case .performance:  PerformanceView()
+        case .protection:   ProtectionView()
+        }
     }
 }
 
-struct PlaceholderView: View {
-    let module: Module
+/// Night-toned sidebar: wordmark, then one nav item per module.
+struct Sidebar: View {
+    @Binding var selection: Module
+
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: module.systemImage).font(.system(size: 44)).foregroundStyle(.secondary)
-            Text(module.rawValue).font(.title2.weight(.semibold))
-            Text(module.reconstructionNote)
-                .font(.callout).foregroundStyle(.secondary)
-                .multilineTextAlignment(.center).frame(maxWidth: 420)
-            Text("Not yet implemented").font(.caption).foregroundStyle(.tertiary)
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            HStack(spacing: Spacing.sm) {
+                IconChip("sparkles", size: 28)
+                Text("MacCleaner").textStyle(.headingSm).foregroundStyle(Palette.onPrimary)
+            }
+            .padding(.horizontal, Spacing.md)
+            .padding(.bottom, Spacing.xl)
+
+            ForEach(Module.allCases) { module in
+                Button { selection = module } label: {
+                    HStack(spacing: Spacing.md) {
+                        Image(systemName: module.systemImage)
+                            .font(.system(size: 14, weight: .semibold))
+                            .frame(width: 20)
+                        Text(module.rawValue).lineLimit(1)
+                    }
+                }
+                .buttonStyle(SidebarItemStyle(isActive: selection == module))
+            }
+            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(40)
+        .padding(.horizontal, Spacing.md)
+        .padding(.top, Spacing.lg)
+        .padding(.bottom, Spacing.xl)
+        .frame(width: 232)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .background(Palette.night.ignoresSafeArea())
     }
 }

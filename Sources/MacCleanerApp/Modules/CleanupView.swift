@@ -1,5 +1,6 @@
 import SwiftUI
 import MacCleanerCore
+import MacCleanerUI
 
 @MainActor
 final class CleanupViewModel: ObservableObject {
@@ -48,42 +49,29 @@ struct CleanupView: View {
     }()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Cleanup").font(.largeTitle.weight(.bold))
-                    Text("System junk, caches, logs, trash — JunkCleanupModule")
-                        .font(.callout).foregroundStyle(.secondary)
-                }
-                Spacer()
+        VStack(alignment: .leading, spacing: Spacing.xl) {
+            PageHeader(Module.cleanup) {
                 if let report = vm.report {
-                    VStack(alignment: .trailing) {
-                        Text(bf.string(fromByteCount: Int64(vm.selectedBytes)))
-                            .font(.system(size: 30, weight: .semibold, design: .rounded)).monospacedDigit()
-                        Text("selected of \(bf.string(fromByteCount: Int64(report.totalBytes)))")
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
+                    HeaderStat(bf.string(fromByteCount: Int64(vm.selectedBytes)),
+                               caption: "selected of \(bf.string(fromByteCount: Int64(report.totalBytes)))")
                 }
             }
 
             if vm.scanning {
-                Spacer(); ProgressView("Scanning for junk…").frame(maxWidth: .infinity); Spacer()
+                LoadingState("Scanning for junk…")
             } else if let report = vm.report {
-                List {
-                    ForEach(JunkCategory.allCases, id: \.self) { category in
-                        let items = report.items.filter { $0.category == category }
-                        if !items.isEmpty {
-                            Section("\(category.rawValue) — \(bf.string(fromByteCount: Int64(items.reduce(0) { $0 + $1.sizeBytes })))") {
-                                ForEach(items) { item in
-                                    Toggle(isOn: Binding(
-                                        get: { vm.selected.contains(item.id) },
-                                        set: { _ in vm.toggle(item) }
-                                    )) {
-                                        HStack {
-                                            Text(item.url.lastPathComponent).lineLimit(1).truncationMode(.middle)
-                                            Spacer()
-                                            Text(bf.string(fromByteCount: Int64(item.sizeBytes)))
-                                                .font(.caption).monospacedDigit().foregroundStyle(.secondary)
+                DataTable {
+                    ScrollView {
+                        LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                            ForEach(JunkCategory.allCases, id: \.self) { category in
+                                let items = report.items.filter { $0.category == category }
+                                if !items.isEmpty {
+                                    Section {
+                                        ForEach(items) { item in row(item) }
+                                    } header: {
+                                        DataTableHeader(category.rawValue) {
+                                            Text(bf.string(fromByteCount: Int64(items.reduce(0) { $0 + $1.sizeBytes })))
+                                                .textStyle(.microCap).foregroundStyle(Palette.onDarkMuted)
                                         }
                                     }
                                 }
@@ -91,24 +79,39 @@ struct CleanupView: View {
                         }
                     }
                 }
-                HStack {
-                    if let msg = vm.statusMessage {
-                        Text(msg).font(.callout).foregroundStyle(.green)
-                    }
+                HStack(spacing: Spacing.md) {
+                    if let msg = vm.statusMessage { StatusLine(msg, kind: .success) }
                     Spacer()
-                    Button("Rescan") { vm.scan() }
-                    Button(role: .destructive) { vm.clean() } label: {
+                    Button("Rescan") { vm.scan() }.buttonStyle(.action(.ghost))
+                    Button { vm.clean() } label: {
                         Label("Clean \(bf.string(fromByteCount: Int64(vm.selectedBytes)))", systemImage: "trash")
                     }
+                    .buttonStyle(.action(.primary))
                     .disabled(vm.selected.isEmpty)
                 }
             } else {
-                Spacer()
-                Button("Scan") { vm.scan() }.controlSize(.large).frame(maxWidth: .infinity)
-                Spacer()
+                EmptyState("Cleanup", message: "Find caches, logs and other junk that's safe to clear.") {
+                    Button("Scan") { vm.scan() }.buttonStyle(.action(.primary))
+                }
             }
         }
-        .padding(24)
+        .padding(Spacing.xxl)
         .onAppear { if vm.report == nil && !vm.scanning { vm.scan() } }
+    }
+
+    private func row(_ item: JunkItem) -> some View {
+        Toggle(isOn: Binding(
+            get: { vm.selected.contains(item.id) },
+            set: { _ in vm.toggle(item) }
+        )) {
+            HStack(spacing: Spacing.md) {
+                Text(item.url.lastPathComponent).lineLimit(1).truncationMode(.middle)
+                Spacer(minLength: Spacing.md)
+                Text(bf.string(fromByteCount: Int64(item.sizeBytes)))
+                    .textStyle(.caption).monospacedDigit().foregroundStyle(Palette.onDarkMuted)
+            }
+        }
+        .toggleStyle(.violetCheckbox)
+        .dataTableRow()
     }
 }

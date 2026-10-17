@@ -1,9 +1,16 @@
 // Generates build/AppIcon.icns — a display with a broom in front, on a gradient.
+// Colors are DESIGN.md tokens: deep violet → night background, dark-canvas
+// screen, and a sticker-style pink + lime broom.
 // Run: swift Scripts/make-icon.swift [output.icns]
 // Also writes a <output>-preview.png (512px) for eyeballing.
 import AppKit
 
 let outPath = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "build/AppIcon.icns"
+
+func hex(_ v: UInt32) -> NSColor {
+    NSColor(srgbRed: CGFloat((v >> 16) & 0xFF) / 255, green: CGFloat((v >> 8) & 0xFF) / 255,
+            blue: CGFloat(v & 0xFF) / 255, alpha: 1)
+}
 
 func drawIcon(px: CGFloat) {
     let rect = NSRect(x: 0, y: 0, width: px, height: px)
@@ -11,10 +18,7 @@ func drawIcon(px: CGFloat) {
     // Rounded gradient background (macOS squircle-ish).
     let radius = px * 0.2237
     NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius).addClip()
-    NSGradient(colors: [
-        NSColor(calibratedRed: 0.64, green: 0.42, blue: 0.96, alpha: 1),
-        NSColor(calibratedRed: 0.42, green: 0.19, blue: 0.80, alpha: 1),
-    ])!.draw(in: rect, angle: -90)
+    NSGradient(colors: [hex(0x422082), hex(0x150F23)])!.draw(in: rect, angle: -90)  // violet-deep → night
 
     // Centered monitor: white bezel with a dark screen.
     let body = NSRect(x: px * 0.16, y: px * 0.37, width: px * 0.68, height: px * 0.42)
@@ -22,7 +26,7 @@ func drawIcon(px: CGFloat) {
     NSBezierPath(roundedRect: body, xRadius: px * 0.05, yRadius: px * 0.05).fill()
 
     let screen = body.insetBy(dx: px * 0.04, dy: px * 0.04)
-    NSColor(calibratedRed: 0.96, green: 0.97, blue: 0.99, alpha: 1).setFill()
+    hex(0x1F1633).setFill()  // surface-canvas-dark
     NSBezierPath(roundedRect: screen, xRadius: px * 0.028, yRadius: px * 0.028).fill()
 
     // Stand: neck + base, white.
@@ -37,7 +41,7 @@ func drawIcon(px: CGFloat) {
     NSBezierPath(roundedRect: NSRect(x: cx - px * 0.13, y: px * 0.255, width: px * 0.26, height: px * 0.04),
                  xRadius: px * 0.018, yRadius: px * 0.018).fill()
 
-    // Broom over the dark screen, in warm colors so it stands out.
+    // Broom over the dark screen, in the accent colors so it stands out.
     drawBroom(px: px, screen: screen)
 }
 
@@ -48,9 +52,9 @@ func drawBroom(px: CGFloat, screen: NSRect) {
     t.rotate(byDegrees: -26)
     t.concat()
 
-    let handleColor = NSColor(calibratedRed: 0.89, green: 0.20, blue: 0.54, alpha: 1)   // deep pink
-    let strawColor  = NSColor(calibratedRed: 1.00, green: 0.45, blue: 0.73, alpha: 1)   // light pink
-    let darkTan     = NSColor(calibratedRed: 0.74, green: 0.11, blue: 0.42, alpha: 1)   // darker pink
+    let handleColor = hex(0xFA7FAA)   // accent-pink
+    let strawColor  = hex(0xC2EF4E)   // accent-lime
+    let darkTan     = hex(0x150F23)   // surface-night — collar + bristle gaps
 
     // Handle (up from the junction at local origin).
     let hw = px * 0.034
