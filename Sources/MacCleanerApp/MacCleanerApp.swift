@@ -131,14 +131,20 @@ struct MacCleanerMainApp: App {
     }
 }
 
-/// Night-toned sidebar: wordmark, then one nav item per module.
+/// Night-toned sidebar: app icon + wordmark, then one nav item per module.
 struct Sidebar: View {
     @Binding var selection: Module
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             HStack(spacing: Spacing.sm) {
-                IconChip("sparkles", size: 28)
+                // The bundle's AppIcon.icns (Scripts/make-icon.swift). Under
+                // `swift run` there's no bundle, so this is the generic app icon.
+                Image(nsImage: NSApp.applicationIconImage)
+                    .resizable()
+                    .interpolation(.high)
+                    .frame(width: 28, height: 28)
+                    .accessibilityHidden(true)
                 Text("MacCleaner").textStyle(.headingSm).foregroundStyle(Palette.onPrimary)
             }
             .padding(.horizontal, Spacing.md)

@@ -23,6 +23,54 @@ menu bar — click it for live RAM / CPU / temperature. To keep it running at
 login, add it in System Settings > General > Login Items. Re-run either script
 after a change to rebuild and relaunch.
 
+## Deploy (install on this Mac)
+
+`build/` is for development: the scripts default to debug builds and wipe the
+bundle on every run, which would break a login item pointing there. For daily
+use, build release and run the copies in `/Applications`.
+
+### Install or update
+
+```sh
+Scripts/make-app.sh release && Scripts/make-menu-app.sh release
+osascript -e 'quit app "MacCleaner"'; pkill -x MacCleanerMenu
+ditto build/MacCleaner.app /Applications/MacCleaner.app
+ditto build/MacCleanerMenu.app /Applications/MacCleanerMenu.app
+open /Applications/MacCleanerMenu.app
+```
+
+The same commands install the first time and update afterwards. The menu's
+left footer button opens the `MacCleaner.app` sitting next to it, so keep both
+in `/Applications`.
+
+### First install only
+
+1. **Open the menu at login:** System Settings > General > Login Items >
+   *Open at Login* > **+** > `/Applications/MacCleanerMenu.app`. Or from the
+   terminal:
+   ```sh
+   osascript -e 'tell application "System Events" to make login item at end with properties {path:"/Applications/MacCleanerMenu.app", hidden:false}'
+   ```
+   The path doesn't change between updates, so this is a one-time step.
+2. **Full Disk Access:** System Settings > Privacy & Security > Full Disk
+   Access > **+** > `/Applications/MacCleaner.app`. Without it, My Clutter and
+   the browser-privacy scan can't see everything.
+
+Because the apps are ad-hoc signed, macOS ties that grant to the exact build.
+If scans start missing files after an update, toggle MacCleaner off and on
+again in Full Disk Access.
+
+### Uninstall
+
+```sh
+osascript -e 'tell application "System Events" to delete login item "MacCleanerMenu"'
+osascript -e 'quit app "MacCleaner"'; pkill -x MacCleanerMenu
+rm -rf /Applications/MacCleaner.app /Applications/MacCleanerMenu.app
+```
+
+These builds run on this Mac only. Shipping to other Macs needs a Developer ID
+and notarization (see below).
+
 ## App icon
 
 The icon is drawn entirely in code by `Scripts/make-icon.swift` — a deep-violet

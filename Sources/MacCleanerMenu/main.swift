@@ -24,6 +24,7 @@ if CommandLine.arguments.contains("--probe") {
     _ = sampler.sample(); Thread.sleep(forTimeInterval: 1.0)
     let net = sampler.sample()
     func rate(_ b: UInt64) -> String { b >= 1_000_000 ? String(format: "%.1f MB/s", Double(b)/1_000_000) : String(format: "%.0f KB/s", Double(b)/1000) }
+    print("Internet:    \(net.link.map { "online via \($0.rawValue)" } ?? "offline")")
     print("Wi-Fi:       \(net.ssid ?? (net.isConnected ? "connected" : "not connected"))  ↓\(rate(net.downBytesPerSec)) ↑\(rate(net.upBytesPerSec))")
     let devices = DeviceMetrics.read()
     print("Devices:     \(devices.isEmpty ? "none" : devices.map { "\($0.name) [\($0.kind)]" }.joined(separator: ", "))")

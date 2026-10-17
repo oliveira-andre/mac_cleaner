@@ -6,7 +6,7 @@ public struct BatteryMetrics: Sendable {
     public enum State: String, Sendable {
         case charging    = "Charging"
         case charged     = "Fully charged"
-        case onBattery   = "On battery"
+        case onBattery   = "Using battery"
         case pluggedIn   = "Plugged in"     // desktop / no internal battery, on AC
         case unknown     = "Unknown"
     }

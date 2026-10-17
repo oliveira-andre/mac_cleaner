@@ -14,7 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
             button.image = NSImage(systemSymbolName: "gauge.with.dots.needle.33percent",
-                                   accessibilityDescription: "Mac Health")
+                                   accessibilityDescription: "MacCleaner")
             button.image?.isTemplate = true
             button.action = #selector(togglePopover(_:))
             button.target = self
@@ -23,8 +23,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         popover = NSPopover()
         popover.behavior = .transient
         popover.appearance = NSAppearance(named: .darkAqua)
-        popover.contentSize = NSSize(width: 300, height: 360)
-        popover.contentViewController = NSHostingController(rootView: MenuView(monitor: monitor))
+        // Size to the content: the devices list grows and shrinks.
+        let host = NSHostingController(rootView: MenuView(monitor: monitor) { [weak self] in self?.openMainApp() })
+        host.sizingOptions = .preferredContentSize
+        popover.contentViewController = host
+    }
+
+    /// Opens MacCleaner.app — the copy built next to this one in build/ if
+    /// there is one, otherwise whatever Launch Services knows by bundle id.
+    private func openMainApp() {
+        popover.performClose(nil)
+        let workspace = NSWorkspace.shared
+        let sibling = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("MacCleaner.app")
+        guard let url = FileManager.default.fileExists(atPath: sibling.path)
+                ? sibling : workspace.urlForApplication(withBundleIdentifier: "io.partnerfleet.maccleaner") else {
+            NSSound.beep()
+            return
+        }
+        workspace.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
     }
 
     @objc private func togglePopover(_ sender: Any?) {
