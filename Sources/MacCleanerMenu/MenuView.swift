@@ -15,11 +15,19 @@ struct MenuView: View {
         return f
     }()
 
+    /// Decimal units for disk sizes, matching Finder and the Overview tile.
+    private let fileFormatter: ByteCountFormatter = {
+        let f = ByteCountFormatter()
+        f.countStyle = .file
+        return f
+    }()
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             if let snap = monitor.snapshot {
                 memorySection(snap.memory)
                 cpuSection(snap.cpu, snap.temperature)
+                storageSection(snap.storage)
                 batterySection(snap.battery)
                 networkSection(snap.network)
                 devicesSection(snap.devices)
@@ -63,6 +71,19 @@ struct MenuView: View {
                         tint: t.thermalState.rawValue >= ProcessInfo.ThermalState.serious.rawValue
                             ? Palette.accentPink : Palette.onPrimary)
             }
+        }
+        .card(padding: Spacing.md)
+    }
+
+    // MARK: - Storage
+
+    private func storageSection(_ s: StorageMetrics) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            label("Storage", detail: "\(fileFormatter.string(fromByteCount: Int64(s.usedBytes))) of \(fileFormatter.string(fromByteCount: Int64(s.totalBytes)))")
+            UsageBar(s.usedFraction)
+            Text("\(fileFormatter.string(fromByteCount: Int64(s.freeBytes))) free")
+                .textStyle(.caption)
+                .foregroundStyle(Palette.onDarkMuted)
         }
         .card(padding: Spacing.md)
     }

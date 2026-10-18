@@ -97,8 +97,17 @@ final class AppModel: ObservableObject {
     init() { monitor.start() }
 }
 
+/// Closing the window quits the app. Without this a WindowGroup app keeps
+/// running window-less in the Dock, and the menu's "Open MacCleaner"
+/// (`NSWorkspace.openApplication`) just activates it — no window comes back.
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+}
+
 @main
 struct MacCleanerMainApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var model = AppModel()
     @State private var selection: Module = .overview
 
